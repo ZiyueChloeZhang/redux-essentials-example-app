@@ -5,10 +5,11 @@ import { Link } from 'react-router-dom'
 import { PostAuthor } from './PostAuthor'
 import { TimeAgo } from './TimeAgo'
 import { ReactionButtons } from './ReactionButtons'
-import { fetchPosts, selectAllPosts } from './postsSlice'
+import { fetchPosts, selectPostIds, selectPostById } from './postsSlice'
 import { useDispatch } from 'react-redux'
 
-const PostExcerpt = ({ post }) => {
+const PostExcerpt = ({ postId }) => {
+  const post = useSelector((state) => selectPostById(state, postId))
   return (
     <article className="post-excerpt">
       <h3>{post.title}</h3>
@@ -29,9 +30,9 @@ const PostExcerpt = ({ post }) => {
 export const PostsList = () => {
   const dispatch = useDispatch()
 
-  const posts = useSelector(selectAllPosts)
   const postsStatus = useSelector((state) => state.posts.status)
   const error = useSelector((state) => state.posts.error)
+  const orderedPostIds = useSelector(selectPostIds)
 
   React.useEffect(() => {
     // prevent fecthing multiple times
@@ -46,13 +47,8 @@ export const PostsList = () => {
     }
 
     if (postsStatus === 'succeeded') {
-      // Sort posts in reverse chronological order by datetime string
-      const orderedPosts = posts
-        .slice()
-        .sort((a, b) => b.date.localeCompare(a.date))
-
-      return orderedPosts.map((post) => (
-        <PostExcerpt key={post.id} post={post} />
+      return orderedPostIds.map((postId) => (
+        <PostExcerpt key={postId} postId={postId} />
       ))
     }
 
